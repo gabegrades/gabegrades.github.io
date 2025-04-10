@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gabe's Physics I - Grade Calculator</title>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Gabe's Physics I - Grade Calculator</h1>
+        <form id="gpa-form">
+            <div class="grade-sections">
+                <!-- Module Problems Section -->
+                <div class="section">
+                    <h2>Module Problems (12 total)</h2>
+                    <div class="grade-inputs">
+                        <div class="grade-input-group">
+                            <label for="mp-num-p">Number of P grades:</label>
+                            <input type="number" id="mp-num-p" min="0" max="12" placeholder="0" class="mp-grade-count-input">
+                        </div>
+                        <div class="grade-input-group">
+                            <label for="mp-num-g">Number of G grades:</label>
+                            <input type="number" id="mp-num-g" min="0" max="12" placeholder="0" class="mp-grade-count-input">
+                        </div>
+                        <div class="grade-input-group">
+                            <label for="mp-num-n">Number of N grades:</label>
+                            <input type="number" id="mp-num-n" min="0" max="12" placeholder="0" class="mp-grade-count-input">
+                        </div>
+                        <div class="grade-input-group">
+                            <label for="mp-num-l">Number of L/B grades:</label>
+                            <input type="number" id="mp-num-l" min="0" max="12" placeholder="0" class="mp-grade-count-input">
+                        </div>
+                    </div>
+                    <div id="mp-total-warning" class="warning hidden">Total must equal 12</div>
+                </div>
+
+                <!-- Integrated Problems Section -->
+                <div class="section">
+                    <h2>Integrated Problems (3 total)</h2>
+                    <div class="grade-inputs">
+                        <div class="grade-input-group">
+                            <label for="ip-num-p">Number of P grades:</label>
+                            <input type="number" id="ip-num-p" min="0" max="3" placeholder="0" class="ip-grade-count-input">
+                        </div>
+                        <div class="grade-input-group">
+                            <label for="ip-num-g">Number of G grades:</label>
+                            <input type="number" id="ip-num-g" min="0" max="3" placeholder="0" class="ip-grade-count-input">
+                        </div>
+                        <div class="grade-input-group">
+                            <label for="ip-num-n">Number of N grades:</label>
+                            <input type="number" id="ip-num-n" min="0" max="3" placeholder="0" class="ip-grade-count-input">
+                        </div>
+                        <div class="grade-input-group">
+                            <label for="ip-num-l">Number of L/B grades:</label>
+                            <input type="number" id="ip-num-l" min="0" max="3" placeholder="0" class="ip-grade-count-input">
+                        </div>
+                    </div>
+                    <div id="ip-total-warning" class="warning hidden">Total must equal 3</div>
+                </div>
+            </div>
+            <div class="boost-options">
+                <div class="boost-section">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="add-recitation-boosts" name="add-recitation-boosts">
+                        <label for="add-recitation-boosts">Add Recitation Boosts</label>
+                    </div>
+                    <div id="recitation-input" class="boost-input hidden">
+                        <label for="recitation-count">Number of Recitations Attended:</label>
+                        <input type="number" id="recitation-count" min="0" max="12" placeholder="0">
+                    </div>
+                </div>
+
+                <div class="boost-section">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="add-homework-boost" name="add-homework-boost">
+                        <label for="add-homework-boost">Add Homework Boost</label>
+                    </div>
+                    <div id="homework-input" class="boost-input hidden">
+                        <label for="homework-score">Homework Score (%):</label>
+                        <input type="number" id="homework-score" min="0" max="100" placeholder="0">
+                    </div>
+                </div>
+            </div>
+            <button type="submit" id="calculate-btn" disabled>Calculate Grade</button>
+        </form>
+        <div id="result">
+            <h2>Base Grade: <span id="grade-value">Not calculated</span></h2>
+            <h2 class="boosted-grade hidden">Boosted Grade: <span id="boosted-grade-value">Not calculated</span></h2>
+        </div>
+    </div>
+    <script src="scripts/app.js"></script>
+</body>
+</html>
