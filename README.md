@@ -52,10 +52,4 @@ gpa-calculator-website
 
 ## Grade Requirements
 
-- A+: All P's for both MP and IP
-- A: 2+ P's in IP (rest G), 10+ P's in MP (rest G)
-- A-: 1+ P in IP (rest G), 9+ P's in MP (rest G)
-- B+: 2+ G in IP (rest N), 8+ P's in MP (rest G)
-- B: 1+ G in IP (rest N), 7+ P's in MP (rest G)
-- B-: 2+ N in IP, 6+ P's in MP, 8+ total P/G in MP
-- C+ through D: Based on MP grades only
+The Modules_and_Grading file in the root directory shows the grade decisions.
