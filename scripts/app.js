@@ -199,6 +199,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     ];
 
+    const HW_cutoffs = {
+        'P': 90,
+        'G': 75,
+        'N': 50
+    };
+
     // Update getTotal function
     function getTotal(dict, level) {
         // Calculate superseded totals
@@ -307,11 +313,11 @@ document.addEventListener('DOMContentLoaded', function() {
     function applyHomeworkBoost(MP_dict, IP_dict, homeworkScore) {
         // First determine what level the homework score translates to
         let homeworkLevel;
-        if (homeworkScore >= 90) {
+        if (homeworkScore >= HW_cutoffs.P) {
             homeworkLevel = 'P';
-        } else if (homeworkScore >= 75) {
+        } else if (homeworkScore >= HW_cutoffs.G) {
             homeworkLevel = 'G';
-        } else if (homeworkScore >= 50) {
+        } else if (homeworkScore >= HW_cutoffs.N) {
             homeworkLevel = 'N';
         } else {
             // If homework score is LOST (< 50%), no boost allowed
@@ -341,25 +347,26 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // Option 2: Try IP single-level boost
+        // Option 2: Try IP single-level boost (Only valid if P)
         const ipBoostOptions = [
             { from: 'G', to: 'P' },
-            { from: 'N', to: 'G' },
-            { from: 'L', to: 'N' }
+            { from: 'N', to: 'G' }
         ];
 
-        for (const { from, to } of ipBoostOptions) {
-            if ((IP_dict[from] || 0) > 0) {
-                const trialIP = { ...IP_dict };
-                trialIP[from]--;
-                trialIP[to] = (trialIP[to] || 0) + 1;
-                
-                const trialGrade = getGrade(trialIP, MP_dict);
-                if (gradeOrder.indexOf(trialGrade) < gradeOrder.indexOf(bestGrade)) {
-                    bestGrade = trialGrade;
-                    bestMP = { ...MP_dict };
-                    bestIP = trialIP;
-                    boostUsed = true;
+        if (homeworkLevel === 'P') {
+            for (const { from, to } of ipBoostOptions) {
+                if ((IP_dict[from] || 0) > 0) {
+                    const trialIP = { ...IP_dict };
+                    trialIP[from]--;
+                    trialIP[to] = (trialIP[to] || 0) + 1;
+                    
+                    const trialGrade = getGrade(trialIP, MP_dict);
+                    if (gradeOrder.indexOf(trialGrade) < gradeOrder.indexOf(bestGrade)) {
+                        bestGrade = trialGrade;
+                        bestMP = { ...MP_dict };
+                        bestIP = trialIP;
+                        boostUsed = true;
+                    }
                 }
             }
         }
