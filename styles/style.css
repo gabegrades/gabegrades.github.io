@@ -223,7 +223,7 @@ button:disabled {
 
 .modal-content {
     background-color: white;
-    padding: 20px;
+    padding: 20px 24px; /* Increase horizontal padding */
     border-radius: 8px;
     width: 85%; /* Slightly reduced from 90% */
     max-width: 750px; /* Reduced from 800px */
@@ -303,7 +303,9 @@ button:disabled {
     padding: 8px 12px;
     border-radius: 4px;
     position: relative;
-    width: 100%;
+    width: auto; /* Change from 100% to auto */
+    margin: 0 4px; /* Add small horizontal margin */
+    border: 1px solid #e0e0e0;
     z-index: 1; /* Each grade type has base z-index */
     cursor: pointer; /* Add cursor pointer to indicate interactivity */
 }
@@ -346,6 +348,7 @@ button:disabled {
 
 .rubric-section {
     margin-bottom: 15px; /* Reduced from 20px */
+    padding: 0 4px; /* Add small horizontal padding */
 }
 
 /* Fix tooltip layering */
@@ -353,6 +356,7 @@ button:disabled {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    margin: 0 8px; /* Add horizontal margin */
     margin-bottom: 12px;
     position: relative; /* Add this */
 }
