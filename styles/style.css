@@ -253,10 +253,10 @@ button:disabled {
     position: relative;
 }
 
-/* Fix close button hover shift */
+/* Fix close button hover shift and color */
 .close-btn {
     font-size: 28px;
-    color: #495057;
+    color: #6c757d; /* Changed from #495057 to a softer gray */
     background: none;
     border: none;
     cursor: pointer;
@@ -270,18 +270,18 @@ button:disabled {
     position: absolute;
     right: 0;
     top: 0;
-    transform: none; /* Remove transform */
-    line-height: 0; /* Change to 0 */
+    transform: none !important;
+    line-height: 0;
 }
 
 .close-btn:hover {
-    color: #000;
+    background-color: #D3D3D3;
+    color: #343a40; /* Changed from #000 to a softer dark gray */
 }
 
-/* Optional: Add focus state for accessibility */
 .close-btn:focus {
     outline: none;
-    color: #000;
+    color: #343a40;
 }
 
 .close-btn:focus-visible {
