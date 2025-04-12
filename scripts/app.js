@@ -265,6 +265,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const boostedGradeDisplay = document.getElementById('boosted-grade-value');
     const boostedGradeSection = document.querySelector('.boosted-grade');
 
+    // Add these to your existing variable declarations
+    const rubricBtn = document.getElementById('rubric-btn');
+    const rubricModal = document.getElementById('rubric-modal');
+    const closeRubricBtn = document.getElementById('close-rubric');
+
     function validateInputs() {
         let mpTotal = 0;
         let ipTotal = 0;
@@ -357,6 +362,30 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Add the rubric toggle functionality
+    rubricBtn.addEventListener('click', function() {
+        if (rubricModal.classList.contains('hidden')) {
+            rubricModal.classList.remove('hidden');
+            rubricBtn.textContent = 'Hide Rubric';
+        } else {
+            rubricModal.classList.add('hidden');
+            rubricBtn.textContent = 'Show Rubric';
+        }
+    });
+
+    closeRubricBtn.addEventListener('click', function() {
+        rubricModal.classList.add('hidden');
+        rubricBtn.textContent = 'Show Rubric';
+    });
+
+    // Close modal when clicking outside
+    window.addEventListener('click', function(event) {
+        if (event.target === rubricModal) {
+            rubricModal.classList.add('hidden');
+            rubricBtn.textContent = 'Show Rubric';
+        }
+    });
+
     // Update the constructDict function
     function constructDict(prefix) {
         return {
@@ -370,5 +399,32 @@ document.addEventListener('DOMContentLoaded', function() {
     function displayResult(grade) {
         resultDisplay.textContent = grade;
     }
+
+    // Add this inside your DOMContentLoaded event listener
+
+    // Add touch support for grade type tooltips
+    document.querySelectorAll('.grade-label').forEach(label => {
+        label.addEventListener('click', function(e) {
+            // First, remove active class from all other labels
+            document.querySelectorAll('.grade-label').forEach(otherLabel => {
+                if (otherLabel !== label) {
+                    otherLabel.classList.remove('active');
+                }
+            });
+            
+            // Toggle active class on clicked label
+            label.classList.toggle('active');
+            
+            // Prevent this click from immediately closing the tooltip
+            e.stopPropagation();
+        });
+    });
+
+    // Close tooltips when clicking outside
+    document.addEventListener('click', function() {
+        document.querySelectorAll('.grade-label').forEach(label => {
+            label.classList.remove('active');
+        });
+    });
 
 });
