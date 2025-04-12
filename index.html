@@ -9,6 +9,9 @@
 <body>
     <div class="container">
         <h1>Gabe's Physics I - Grade Calculator</h1>
+        <div class="rubric-control">
+            <button id="rubric-btn" type="button">Show Rubric</button>
+        </div>
         <form id="gpa-form">
             <div class="grade-sections">
                 <!-- Module Problems Section -->
@@ -87,6 +90,162 @@
         <div id="result">
             <h2>Base Grade: <span id="grade-value">Not calculated</span></h2>
             <h2 class="boosted-grade hidden">Boosted Grade: <span id="boosted-grade-value">Not calculated</span></h2>
+        </div>
+    </div>
+    <div id="rubric-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Physics I Grading Rubric</h2>
+                <button id="close-rubric" class="close-btn" aria-label="Close rubric">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="rubric-section">
+                    <h3>Grade Types</h3>
+                    <div class="grade-grid">
+                        <div class="grade-type">
+                            <div class="grade-label">
+                                P - Proficient
+                                <span class="info-icon">ⓘ</span>
+                                <div class="tooltip">
+                                    Well executed, logically correct solution; has an overall logically sound
+                                    argument (which may be required to be articulated in words). The solution may not be optimal,
+                                    but it is correct physically, logically, and mathematically (barring very minor errors).
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grade-type">
+                            <div class="grade-label">
+                                G - Getting There
+                                <span class="info-icon">ⓘ</span>
+                                <div class="tooltip">
+                                    Exhibits solid problem-solving; more than half of the pieces of the solution
+                                    are in place; you don't get all the way there but make significant progress toward a complete
+                                    solution.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grade-type">
+                            <div class="grade-label">
+                                N - Needs Improvement
+                                <span class="info-icon">ⓘ</span>
+                                <div class="tooltip">
+                                    Fails to connect many pieces; has less than half of
+                                    logical flow of the solution demonstrates awareness of basics but not much more (writing only
+                                    formulas does not count); exhibits at least some physical problem-solving competence.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grade-type">
+                            <div class="grade-label">
+                                L/B - Lost/Blank
+                                <span class="info-icon">ⓘ</span>
+                                <div class="tooltip">
+                                    Throwing darts, nothing logical, does not demonstrate any comprehension of the
+                                    concepts. Should have been (or was) left blank.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="rubric-section">
+                    <h3>Grade Requirements</h3>
+                    <div class="requirements-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Grade</th>
+                                    <th>Integrated Problems (IP)</th>
+                                    <th>Module Problems (MP)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>A+</td>
+                                    <td>All P (3P)</td>
+                                    <td>All P (12P)</td>
+                                </tr>
+                                <tr>
+                                    <td>A</td>
+                                    <td>2P, 3≥G</td>
+                                    <td>10P</td>
+                                </tr>
+                                <tr>
+                                    <td>A-</td>
+                                    <td>1P, 3≥G</td>
+                                    <td>9P, 10≥G</td>
+                                </tr>
+                                <tr>
+                                    <td>B+</td>
+                                    <td>2≥G, 3≥N</td>
+                                    <td>8P, 9≥G</td>
+                                </tr>
+                                <tr>
+                                    <td>B</td>
+                                    <td>1G, 2≥N</td>
+                                    <td>7P, 9≥G</td>
+                                </tr>
+                                <tr>
+                                    <td>B-</td>
+                                    <td>2≥N</td>
+                                    <td>6P, 8≥G, 9≥N</td>
+                                </tr>
+                                <tr>
+                                    <td>C+</td>
+                                    <td>Any</td>
+                                    <td>5P, 7≥G, 8≥N</td>
+                                </tr>
+                                <tr>
+                                    <td>C</td>
+                                    <td>Any</td>
+                                    <td>4P, 6≥G, 8≥N</td>
+                                </tr>
+                                <tr>
+                                    <td>C-</td>
+                                    <td>Any</td>
+                                    <td>3P, 6≥G, 8≥N</td>
+                                </tr>
+                                <tr>
+                                    <td>D</td>
+                                    <td>Any</td>
+                                    <td>2P, 5≥G, 7≥N</td>
+                                </tr>
+                                <tr>
+                                    <td>F</td>
+                                    <td>Any</td>
+                                    <td>Below Standards for D</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="rubric-section">
+                    <h3>Boost Systems</h3>
+                    <div class="boost-grid">
+                        <div class="boost-type">
+                            <h4>Homework Boost</h4>
+                            <ul>
+                                <li>≥90%: Replace MP with P OR single-level IP boost</li>
+                                <li>≥75%: Replace MP with G</li>
+                                <li>≥50%: Replace MP with N</li>
+                                <li>Cannot replace L grades</li>
+                                <li>Boosts always applied to help you optimally</li>
+                            </ul>
+                        </div>
+                        <div class="boost-type">
+                            <h4>Recitation Boosts</h4>
+                            <ul>
+                                <li>8-9 attendances: 1 boost</li>
+                                <li>10+ attendances: 2 boosts</li>
+                                <li>MP: 1 boost needed per level (N → G, G → P)</li>
+                                <li>IP: 2 boosts needed per level (N → G, G → P)</li>
+                                <li>Boosts always applied to help you optimally</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     <script src="scripts/app.js"></script>
