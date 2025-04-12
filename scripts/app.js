@@ -23,6 +23,231 @@
  *    - <50%: No replacement
  */
 
+const gradeRequirements = [
+    {
+        grade: "A+",
+        IP: { P: 3 },
+        MP: { P: 12 }
+    },
+    {
+        grade: "A",
+        IP: { P: 2, G: 3 },
+        MP: { P: 10 }
+    },
+    {
+        grade: "A-",
+        IP: { P: 1, G: 3 },
+        MP: { P: 9, G: 10 }
+    },
+    {
+        grade: "B+",
+        IP: { G: 2, N: 3 },
+        MP: { P: 8, G: 9 }
+    },
+    {
+        grade: "B",
+        IP: { G: 1, N: 2 },
+        MP: { P: 7, G: 9 }
+    },
+    {
+        grade: "B-",
+        IP: { N: 2 },
+        MP: { P: 6, G: 8, N: 9 }
+    },
+    {
+        grade: "C+",
+        IP: {},
+        MP: { P: 5, G: 7, N: 8 }
+    },
+    {
+        grade: "C",
+        IP: {},
+        MP: { P: 4, G: 6, N: 8 }
+    },
+    {
+        grade: "C-",
+        IP: {},
+        MP: { P: 3, G: 6, N: 8 }
+    },
+    {
+        grade: "D",
+        IP: {},
+        MP: { P: 2, G: 5, N: 7 }
+    }
+];
+
+// Update getTotal function
+function getTotal(dict, level) {
+    // Calculate superseded totals
+    const p = dict['P'] || 0;
+    const g = dict['G'] || 0;
+    const n = dict['N'] || 0;
+    const l = dict['L'] || 0; // L represents both L and B grades
+
+    if (level === 'P') return p;
+    if (level === 'G') return p + g;
+    if (level === 'N') return p + g + n;
+    if (level === 'L') return p + g + n + l;
+
+    return 0;
+}
+
+function getGrade(IP_dict, MP_dict) {
+    for (const req of gradeRequirements) {
+        let ipPass = true;
+        let mpPass = true;
+
+        // Check Integrated Problems
+        for (const [key, val] of Object.entries(req.IP)) {
+            if (getTotal(IP_dict, key) < val) {
+                ipPass = false;
+                break;
+            }
+        }
+
+        // Check Module Problems
+        for (const [key, val] of Object.entries(req.MP)) {
+            if (getTotal(MP_dict, key) < val) {
+                mpPass = false;
+                break;
+            }
+        }
+
+        if (ipPass && mpPass) {
+            return req.grade;
+        }
+    }
+
+    return "F"; // If no grades matched
+}
+
+// Assume gradeRequirements and getTotal, getGrade already defined.
+
+const gradeOrder = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F"];
+
+function applySingleBoost(dict, from, to) {
+    const newDict = { ...dict };
+    if ((newDict[from] || 0) > 0) {
+        newDict[from]--;
+        newDict[to] = (newDict[to] || 0) + 1;
+    }
+    return newDict;
+}
+
+function optimizeBoosts(IP_dict, MP_dict, numBoosts) {
+    let bestGrade = getGrade(IP_dict, MP_dict);
+    let bestIP = { ...IP_dict };
+    let bestMP = { ...MP_dict };
+
+    function dfs(currentIP, currentMP, boostsLeft) {
+        const currentGrade = getGrade(currentIP, currentMP);
+        if (gradeOrder.indexOf(currentGrade) < gradeOrder.indexOf(bestGrade)) {
+            bestGrade = currentGrade;
+            bestIP = { ...currentIP };
+            bestMP = { ...currentMP };
+        }
+
+        if (boostsLeft <= 0) return;
+
+        // Try all possible boosts on MP first (1 boost each)
+        const mpBoostOptions = [
+            { from: 'G', to: 'P', cost: 1 },
+            { from: 'N', to: 'G', cost: 1 },
+            { from: 'L', to: 'N', cost: 1 }
+        ];
+        for (const { from, to, cost } of mpBoostOptions) {
+            if ((currentMP[from] || 0) > 0 && boostsLeft >= cost) {
+                const newMP = applySingleBoost(currentMP, from, to);
+                dfs(currentIP, newMP, boostsLeft - cost);
+            }
+        }
+
+        // Try all possible boosts on IP next (2 boosts each)
+        const ipBoostOptions = [
+            { from: 'G', to: 'P', cost: 2 },
+            { from: 'N', to: 'G', cost: 2 },
+            { from: 'L', to: 'N', cost: 2 }
+        ];
+        for (const { from, to, cost } of ipBoostOptions) {
+            if ((currentIP[from] || 0) > 0 && boostsLeft >= cost) {
+                const newIP = applySingleBoost(currentIP, from, to);
+                dfs(newIP, currentMP, boostsLeft - cost);
+            }
+        }
+    }
+
+    dfs(IP_dict, MP_dict, numBoosts);
+
+    return { boostedIP: bestIP, boostedMP: bestMP, finalGrade: bestGrade };
+}
+
+function applyHomeworkBoost(MP_dict, IP_dict, homeworkScore) {
+    // First determine what level the homework score translates to
+    let homeworkLevel;
+    if (homeworkScore >= 90) {
+        homeworkLevel = 'P';
+    } else if (homeworkScore >= 75) {
+        homeworkLevel = 'G';
+    } else if (homeworkScore >= 50) {
+        homeworkLevel = 'N';
+    } else {
+        // If homework score is LOST (< 50%), no boost allowed
+        return { boostedMP: { ...MP_dict }, boostedIP: { ...IP_dict }, boostUsed: false };
+    }
+
+    let bestGrade = getGrade(IP_dict, MP_dict);
+    let bestMP = { ...MP_dict };
+    let bestIP = { ...IP_dict };
+    let boostUsed = false;
+
+    // Option 1: Try MP replacement (excluding L grades)
+    const mpLevels = ['N', 'G', 'P'];
+    for (const level of mpLevels) {
+        if ((MP_dict[level] || 0) > 0) {
+            const trialMP = { ...MP_dict };
+            trialMP[level]--;
+            trialMP[homeworkLevel] = (trialMP[homeworkLevel] || 0) + 1;
+            
+            const trialGrade = getGrade(IP_dict, trialMP);
+            if (gradeOrder.indexOf(trialGrade) < gradeOrder.indexOf(bestGrade)) {
+                bestGrade = trialGrade;
+                bestMP = trialMP;
+                bestIP = { ...IP_dict };
+                boostUsed = true;
+            }
+        }
+    }
+
+    // Option 2: Try IP single-level boost
+    const ipBoostOptions = [
+        { from: 'G', to: 'P' },
+        { from: 'N', to: 'G' },
+        { from: 'L', to: 'N' }
+    ];
+
+    for (const { from, to } of ipBoostOptions) {
+        if ((IP_dict[from] || 0) > 0) {
+            const trialIP = { ...IP_dict };
+            trialIP[from]--;
+            trialIP[to] = (trialIP[to] || 0) + 1;
+            
+            const trialGrade = getGrade(trialIP, MP_dict);
+            if (gradeOrder.indexOf(trialGrade) < gradeOrder.indexOf(bestGrade)) {
+                bestGrade = trialGrade;
+                bestMP = { ...MP_dict };
+                bestIP = trialIP;
+                boostUsed = true;
+            }
+        }
+    }
+
+    return {
+        boostedMP: bestMP,
+        boostedIP: bestIP,
+        boostUsed: boostUsed
+    };
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const mpGradeInputs = document.querySelectorAll('.mp-grade-count-input');
     const ipGradeInputs = document.querySelectorAll('.ip-grade-count-input');
@@ -144,238 +369,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function displayResult(grade) {
         resultDisplay.textContent = grade;
-    }
-
-    const gradeRequirements = [
-        {
-            grade: "A+",
-            IP: { P: 3 },
-            MP: { P: 12 }
-        },
-        {
-            grade: "A",
-            IP: { P: 2, G: 3 },
-            MP: { P: 10 }
-        },
-        {
-            grade: "A-",
-            IP: { P: 1, G: 3 },
-            MP: { P: 9, G: 10 }
-        },
-        {
-            grade: "B+",
-            IP: { G: 2, N: 3 },
-            MP: { P: 8, G: 9 }
-        },
-        {
-            grade: "B",
-            IP: { G: 1, N: 2 },
-            MP: { P: 7, G: 9 }
-        },
-        {
-            grade: "B-",
-            IP: { N: 2 },
-            MP: { P: 6, G: 8, N: 9 }
-        },
-        {
-            grade: "C+",
-            IP: {},
-            MP: { P: 5, G: 7, N: 8 }
-        },
-        {
-            grade: "C",
-            IP: {},
-            MP: { P: 4, G: 6, N: 8 }
-        },
-        {
-            grade: "C-",
-            IP: {},
-            MP: { P: 3, G: 6, N: 8 }
-        },
-        {
-            grade: "D",
-            IP: {},
-            MP: { P: 2, G: 5, N: 7 }
-        }
-    ];
-
-    const HW_cutoffs = {
-        'P': 90,
-        'G': 75,
-        'N': 50
-    };
-
-    // Update getTotal function
-    function getTotal(dict, level) {
-        // Calculate superseded totals
-        const p = dict['P'] || 0;
-        const g = dict['G'] || 0;
-        const n = dict['N'] || 0;
-        const l = dict['L'] || 0; // L represents both L and B grades
-
-        if (level === 'P') return p;
-        if (level === 'G') return p + g;
-        if (level === 'N') return p + g + n;
-        if (level === 'L') return p + g + n + l;
-
-        return 0;
-    }
-    
-    function getGrade(IP_dict, MP_dict) {
-        for (const req of gradeRequirements) {
-            let ipPass = true;
-            let mpPass = true;
-    
-            // Check Integrated Problems
-            for (const [key, val] of Object.entries(req.IP)) {
-                if (getTotal(IP_dict, key) < val) {
-                    ipPass = false;
-                    break;
-                }
-            }
-    
-            // Check Module Problems
-            for (const [key, val] of Object.entries(req.MP)) {
-                if (getTotal(MP_dict, key) < val) {
-                    mpPass = false;
-                    break;
-                }
-            }
-    
-            if (ipPass && mpPass) {
-                return req.grade;
-            }
-        }
-    
-        return "F"; // If no grades matched
-    }
-
-    // Assume gradeRequirements and getTotal, getGrade already defined.
-
-    const gradeOrder = ["A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D", "F"];
-
-    function applySingleBoost(dict, from, to) {
-        const newDict = { ...dict };
-        if ((newDict[from] || 0) > 0) {
-            newDict[from]--;
-            newDict[to] = (newDict[to] || 0) + 1;
-        }
-        return newDict;
-    }
-
-    function optimizeBoosts(IP_dict, MP_dict, numBoosts) {
-        let bestGrade = getGrade(IP_dict, MP_dict);
-        let bestIP = { ...IP_dict };
-        let bestMP = { ...MP_dict };
-
-        function dfs(currentIP, currentMP, boostsLeft) {
-            const currentGrade = getGrade(currentIP, currentMP);
-            if (gradeOrder.indexOf(currentGrade) < gradeOrder.indexOf(bestGrade)) {
-                bestGrade = currentGrade;
-                bestIP = { ...currentIP };
-                bestMP = { ...currentMP };
-            }
-
-            if (boostsLeft <= 0) return;
-
-            // Try all possible boosts on MP first (1 boost each)
-            const mpBoostOptions = [
-                { from: 'G', to: 'P', cost: 1 },
-                { from: 'N', to: 'G', cost: 1 },
-                { from: 'L', to: 'N', cost: 1 }
-            ];
-            for (const { from, to, cost } of mpBoostOptions) {
-                if ((currentMP[from] || 0) > 0 && boostsLeft >= cost) {
-                    const newMP = applySingleBoost(currentMP, from, to);
-                    dfs(currentIP, newMP, boostsLeft - cost);
-                }
-            }
-
-            // Try all possible boosts on IP next (2 boosts each)
-            const ipBoostOptions = [
-                { from: 'G', to: 'P', cost: 2 },
-                { from: 'N', to: 'G', cost: 2 },
-                { from: 'L', to: 'N', cost: 2 }
-            ];
-            for (const { from, to, cost } of ipBoostOptions) {
-                if ((currentIP[from] || 0) > 0 && boostsLeft >= cost) {
-                    const newIP = applySingleBoost(currentIP, from, to);
-                    dfs(newIP, currentMP, boostsLeft - cost);
-                }
-            }
-        }
-
-        dfs(IP_dict, MP_dict, numBoosts);
-
-        return { boostedIP: bestIP, boostedMP: bestMP, finalGrade: bestGrade };
-    }
-
-    function applyHomeworkBoost(MP_dict, IP_dict, homeworkScore) {
-        // First determine what level the homework score translates to
-        let homeworkLevel;
-        if (homeworkScore >= HW_cutoffs.P) {
-            homeworkLevel = 'P';
-        } else if (homeworkScore >= HW_cutoffs.G) {
-            homeworkLevel = 'G';
-        } else if (homeworkScore >= HW_cutoffs.N) {
-            homeworkLevel = 'N';
-        } else {
-            // If homework score is LOST (< 50%), no boost allowed
-            return { boostedMP: { ...MP_dict }, boostedIP: { ...IP_dict }, boostUsed: false };
-        }
-
-        let bestGrade = getGrade(IP_dict, MP_dict);
-        let bestMP = { ...MP_dict };
-        let bestIP = { ...IP_dict };
-        let boostUsed = false;
-
-        // Option 1: Try MP replacement (excluding L grades)
-        const mpLevels = ['N', 'G', 'P'];
-        for (const level of mpLevels) {
-            if ((MP_dict[level] || 0) > 0) {
-                const trialMP = { ...MP_dict };
-                trialMP[level]--;
-                trialMP[homeworkLevel] = (trialMP[homeworkLevel] || 0) + 1;
-                
-                const trialGrade = getGrade(IP_dict, trialMP);
-                if (gradeOrder.indexOf(trialGrade) < gradeOrder.indexOf(bestGrade)) {
-                    bestGrade = trialGrade;
-                    bestMP = trialMP;
-                    bestIP = { ...IP_dict };
-                    boostUsed = true;
-                }
-            }
-        }
-
-        // Option 2: Try IP single-level boost (Only valid if P)
-        const ipBoostOptions = [
-            { from: 'G', to: 'P' },
-            { from: 'N', to: 'G' }
-        ];
-
-        if (homeworkLevel === 'P') {
-            for (const { from, to } of ipBoostOptions) {
-                if ((IP_dict[from] || 0) > 0) {
-                    const trialIP = { ...IP_dict };
-                    trialIP[from]--;
-                    trialIP[to] = (trialIP[to] || 0) + 1;
-                    
-                    const trialGrade = getGrade(trialIP, MP_dict);
-                    if (gradeOrder.indexOf(trialGrade) < gradeOrder.indexOf(bestGrade)) {
-                        bestGrade = trialGrade;
-                        bestMP = { ...MP_dict };
-                        bestIP = trialIP;
-                        boostUsed = true;
-                    }
-                }
-            }
-        }
-
-        return {
-            boostedMP: bestMP,
-            boostedIP: bestIP,
-            boostUsed: boostUsed
-        };
     }
 
 });
