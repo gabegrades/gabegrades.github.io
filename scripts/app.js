@@ -403,17 +403,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add this inside your DOMContentLoaded event listener
 
     // Add touch support for grade type tooltips
-    document.querySelectorAll('.grade-label').forEach(label => {
-        label.addEventListener('click', function(e) {
-            // First, remove active class from all other labels
-            document.querySelectorAll('.grade-label').forEach(otherLabel => {
-                if (otherLabel !== label) {
-                    otherLabel.classList.remove('active');
+    document.querySelectorAll('.grade-type').forEach(type => {
+        type.addEventListener('click', function(e) {
+            // First, remove active class from all other types
+            document.querySelectorAll('.grade-type').forEach(otherType => {
+                if (otherType !== type) {
+                    otherType.classList.remove('active');
                 }
             });
             
-            // Toggle active class on clicked label
-            label.classList.toggle('active');
+            // Toggle active class on clicked type
+            type.classList.toggle('active');
             
             // Prevent this click from immediately closing the tooltip
             e.stopPropagation();
@@ -422,8 +422,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Close tooltips when clicking outside
     document.addEventListener('click', function() {
-        document.querySelectorAll('.grade-label').forEach(label => {
-            label.classList.remove('active');
+        document.querySelectorAll('.grade-type').forEach(type => {
+            type.classList.remove('active');
         });
     });
 
