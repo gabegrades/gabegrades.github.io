@@ -19,15 +19,15 @@ This website calculates final grades for Gabe's Physics I course based on Module
 ```
 gpa-calculator-website
 ├── scripts
-│   └── app.js              # Grade calculation logic and UI interactions
+│   └── app.js                      # Grade calculation logic and UI interactions
 ├── styles
-│   └── style.css           # Website styling
+│   └── style.css                   # Website styling
 ├── tests
-│   └── test-grade-calculator.js              # Unit tests for Calculator Logic
-├── index.html              # Main calculator interface
-├── assets                  #additional assets
-├── package.json            # Project configuration
-└── README.md               # Documentation
+│   └── test-grade-calculator.js    # Unit tests for Calculator Logic
+├── index.html                      # Main calculator interface
+├── assets                          # Additional assets
+├── package.json                    # Project configuration
+└── README.md                       # Documentation
 ```
 
 ## Usage
