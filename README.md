@@ -25,7 +25,7 @@ gpa-calculator-website
 ├── tests
 │   └── test-grade-calculator.js              # Unit tests for Calculator Logic
 ├── index.html              # Main calculator interface
-├── assets            additional assets
+├── assets                  #additional assets
 ├── package.json            # Project configuration
 └── README.md               # Documentation
 ```
