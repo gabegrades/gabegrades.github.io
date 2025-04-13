@@ -11,35 +11,24 @@ This website calculates final grades for Gabe's Physics I course based on Module
 - Optional grade boosts:
   - Recitation attendance boost (1-2 boosts based on attendance)
   - Homework performance boost
-- Real-time validation of input totals
+- Up-to-date Rubric
 - Displays both base grade and boosted grade when applicable
 
 ## Project Structure
 
 ```
 gpa-calculator-website
-├── src
-│   ├── index.html          # Main calculator interface
-│   ├── styles
-│   │   └── style.css       # Website styling
-│   ├── scripts
-│   │   └── app.js          # Grade calculation logic and UI interactions
-│   └── assets              # Additional assets
+├── scripts
+│   └── app.js              # Grade calculation logic and UI interactions
+├── styles
+│   └── style.css           # Website styling
+├── tests
+│   └── test-grade-calculator.js              # Unit tests for Calculator Logic
+├── index.html              # Main calculator interface
+├── assets            additional assets
 ├── package.json            # Project configuration
-└── README.md              # Documentation
+└── README.md               # Documentation
 ```
-
-## Getting Started
-
-1. **Install dependencies**:
-   ```bash
-   npm install
-   ```
-
-2. **Start the development server**:
-   ```bash
-   npm start
-   ```
 
 ## Usage
 
@@ -52,4 +41,7 @@ gpa-calculator-website
 
 ## Grade Requirements
 
-The Modules_and_Grading file in the root directory shows the grade decisions.
+Press the "Show Rubric" button to see an explanation for:
+- Grade Types
+- Grade Cutoffs
+- Homework/Recitation Boosts
