@@ -8,16 +8,52 @@ body {
     padding: 20px;
 }
 
+/* Update header styling */
 h1 {
-    text-align: center;
+    text-align: left; /* Change from center to left */
     color: #333;
+    margin: 0; /* Remove default margin */
+    padding-left: 5px; /* Add slight left padding */
+    font-size: 1.8rem; /* Adjust size if needed */
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 0 10px; /* Add horizontal padding */
+}
+
+.rubric-control {
+    margin: 0; /* Remove margin since it's now part of header flex */
+    padding-right: 5px; /* Add slight right padding */
+}
+
+#rubric-btn {
+    background-color: #17a2b8;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+    white-space: nowrap; /* Prevent button text from wrapping */
+    margin-left: 20px; /* Add left margin to separate from title */
+}
+
+#rubric-btn:hover {
+    background-color: #138496;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .container {
     max-width: 900px; /* Slightly reduced from 1000px */
     margin: 0 auto;
     background: white;
-    padding: 15px; /* Reduced from 20px */
+    padding: 20px; /* Increased from 15px */
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
@@ -176,28 +212,6 @@ button:disabled {
 
 .boosted-grade {
     color: #28a745;
-}
-
-.rubric-control {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
-#rubric-btn {
-    background-color: #17a2b8;
-    color: white;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s ease-in-out;
-}
-
-#rubric-btn:hover {
-    background-color: #138496;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .modal {
