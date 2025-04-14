@@ -601,3 +601,16 @@ input[type="checkbox"] {
 .disclaimer p {
     margin: 0;
 }
+
+/* Update modal-content padding for mobile */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        padding: 25px 15px 15px 15px; /* Increased top padding */
+    }
+
+    .modal-header {
+        margin-top: 5px; /* Add some space at the top */
+        padding-right: 35px; /* Make space for close button */
+    }
+}
