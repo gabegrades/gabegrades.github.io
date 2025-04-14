@@ -585,3 +585,19 @@ input[type="checkbox"] {
         padding: 15px;
     }
 }
+
+.disclaimer {
+    margin-top: 20px;
+    padding: 15px 20px;
+    background-color: #f8f9fa; /* Soft background */
+    border: 1px solid #dee2e6; /* Light gray border */
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #6c757d; /* Slightly lighter muted text */
+    text-align: left;
+    line-height: 1.5;
+}
+
+.disclaimer p {
+    margin: 0;
+}
