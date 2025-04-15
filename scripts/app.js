@@ -433,20 +433,22 @@ document.addEventListener('DOMContentLoaded', function() {
         resultDisplay.textContent = grade;
     }
 
-    // Add this inside your DOMContentLoaded event listener
-
     // Add touch support for grade type tooltips
     document.querySelectorAll('.grade-type').forEach(type => {
         type.addEventListener('click', function(e) {
-            // First, remove active class from all other types
-            document.querySelectorAll('.grade-type').forEach(otherType => {
-                if (otherType !== type) {
-                    otherType.classList.remove('active');
-                }
-            });
-            
-            // Toggle active class on clicked type
-            type.classList.toggle('active');
+            // If this type is already active, just deactivate it
+            if (type.classList.contains('active')) {
+                type.classList.remove('active');
+            } 
+            else {
+                // Otherwise, remove active from others and activate this one
+                document.querySelectorAll('.grade-type').forEach(otherType => {
+                    if (otherType !== type) {
+                        otherType.classList.remove('active');
+                    }
+                });
+                type.classList.add('active');
+            }
             
             // Prevent this click from immediately closing the tooltip
             e.stopPropagation();
