@@ -322,9 +322,11 @@ button:disabled {
     border: 1px solid #e0e0e0;
     z-index: 1; /* Each grade type has base z-index */
     cursor: pointer; /* Add cursor pointer to indicate interactivity */
+    transform: translateX(0); /* Add default position */
+    transition: all 0.2s ease-in-out;
 }
 
-.grade-type:hover {
+.grade-type:hover{
     z-index: 2; /* Increase z-index on hover */
     border-color: #17a2b8;
     transform: translateX(2px);
@@ -515,19 +517,31 @@ button:disabled {
 
 /* Handle mobile devices */
 @media (hover: none) {
+    .grade-type.active {
+        z-index: 2; /* Increase z-index on hover */
+        border-color: #17a2b8;
+        transform: translateX(2px);
+    }
+
+    .grade-type:not(.active) {
+        border-color: #e0e0e0;
+        transform: translateX(0);
+    }
+
     .grade-type.active .tooltip {
         visibility: visible;
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .grade-type:not(.active) .tooltip {
+        visibility: hidden;
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px);
     }
     
     .grade-type {
         padding: 15px;
-    }
-}
-
-/* Update mobile handling */
-@media (hover: none) {
-    .grade-type.active .tooltip {
-        visibility: visible;
     }
 }
 
