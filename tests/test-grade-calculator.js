@@ -41,54 +41,48 @@ function runBaseGradeTests() {
 
 function runHomeworkBoostTests() {
     const tests = [
-        { description: "HW 92% replaces N in MP", IP: {P:0,G:0,N:3,L:0}, MP: {P:5,G:6,N:1,L:0}, hwScore: 92, expected: "B-" },
-        { description: "HW 92% boosts MP G→P", IP: {P:0,G:2,N:1,L:0}, MP: {P:7,G:5,N:0,L:0}, hwScore: 92, expected: "B+" },
-        { description: "HW 92% can't boost both", IP: {P:0,G:1,N:2,L:0}, MP: {P:7,G:5,N:0,L:0}, hwScore: 92, expected: "B" },
-        { description: "HW 85% replaces N in MP", IP: {P:0,G:2,N:1,L:0}, MP: {P:7,G:5,N:0,L:0}, hwScore: 85, expected: "B" },
-        { description: "HW 72% boost not very helpful", IP: {P:0,G:2,N:1,L:0}, MP: {P:7,G:5,N:0,L:0}, hwScore: 72, expected: "B" },
-        { description: "HW 45% provides no boost", IP: {P:0,G:1,N:2,L:0}, MP: {P:4,G:6,N:2,L:0}, hwScore: 45, expected: "C" },
-        { description: "HW 92% boost IP but not enough", IP: {P:0,G:2,N:1,L:0}, MP: {P:9,G:3,N:0,L:0}, hwScore: 92, expected: "B+" },
-        { description: "HW 92% boosts IP to 1P, >=3G", IP: {P:0,G:3,N:0,L:0}, MP: {P:9,G:3,N:0,L:0}, hwScore: 92, expected: "A-" }
+        { description: "HW 92% replaces N in MP", IP: {P:0,G:0,N:3,L:0}, MP: {P:5,G:6,N:1,L:0}, hwScore: 92, recitationCount: 0, expected: "B-" },
+        { description: "HW 92% boosts MP G→P", IP: {P:0,G:2,N:1,L:0}, MP: {P:7,G:5,N:0,L:0}, hwScore: 92, recitationCount: 0, expected: "B+" },
+        { description: "HW 92% can't boost both", IP: {P:0,G:1,N:2,L:0}, MP: {P:7,G:5,N:0,L:0}, hwScore: 92, recitationCount: 0, expected: "B" },
+        { description: "HW 85% replaces N in MP", IP: {P:0,G:2,N:1,L:0}, MP: {P:7,G:5,N:0,L:0}, hwScore: 85, recitationCount: 0, expected: "B" },
+        { description: "HW 72% boost not very helpful", IP: {P:0,G:2,N:1,L:0}, MP: {P:7,G:5,N:0,L:0}, hwScore: 72, recitationCount: 0, expected: "B" },
+        { description: "HW 45% provides no boost", IP: {P:0,G:1,N:2,L:0}, MP: {P:4,G:6,N:2,L:0}, hwScore: 45, recitationCount: 0, expected: "C" },
+        { description: "HW 92% boost IP but not enough", IP: {P:0,G:2,N:1,L:0}, MP: {P:9,G:3,N:0,L:0}, hwScore: 92, recitationCount: 0, expected: "B+" },
+        { description: "HW 92% boosts IP to 1P, >=3G", IP: {P:0,G:3,N:0,L:0}, MP: {P:9,G:3,N:0,L:0}, hwScore: 92, recitationCount: 0, expected: "A-" }
     ];
     
     runTestSuite(tests, (test) => {
-        const result = applyHomeworkBoost(test.MP, test.IP, test.hwScore);
-        return getGrade(result.boostedIP, result.boostedMP);
+        const result = optimizeAll(test.IP, test.MP, test.hwScore, test.recitationCount);
+        return result.finalGrade;
     });
 }
 
 function runRecitationBoostTests() {
     const tests = [
-        { description: "2 recitation boosts IP G→P", IP: {P:0,G:3,N:0,L:0}, MP: {P:9,G:2,N:1,L:0}, boosts: 2, expected: "A-" },
-        { description: "1 boost MP N→G", IP: {P:0,G:1,N:2,L:0}, MP: {P:4,G:6,N:2,L:0}, boosts: 1, expected: "C+" },
-        { description: "Boosts optimized perfectly to save an F", IP: {P:0,G:0,N:0,L:3}, MP: {P:2,G:2,N:2,L:6}, boosts: 2, expected: "D" },
-        { description: "Boosts can't save failing grade (too many L's)", IP: {P:0,G:0,N:0,L:3}, MP: {P:2,G:1,N:2,L:6}, boosts: 2, expected: "F" }
+        { description: "2 recitation boosts IP G→P", IP: {P:0,G:3,N:0,L:0}, MP: {P:9,G:2,N:1,L:0}, hwScore: 0, recitationCount: 10, expected: "A-" },
+        { description: "1 boost MP N→G", IP: {P:0,G:1,N:2,L:0}, MP: {P:4,G:6,N:2,L:0}, hwScore: 0, recitationCount: 8, expected: "C+" },
+        { description: "Boosts optimized perfectly to save an F", IP: {P:0,G:0,N:0,L:3}, MP: {P:2,G:2,N:2,L:6}, hwScore: 0, recitationCount: 10, expected: "D" },
+        { description: "Boosts can't save failing grade (too many L's)", IP: {P:0,G:0,N:0,L:3}, MP: {P:2,G:1,N:2,L:6}, hwScore: 0, recitationCount: 10, expected: "F" }
     ];
     
     runTestSuite(tests, (test) => {
-        const result = optimizeBoosts(test.IP, test.MP, test.boosts);
+        const result = optimizeAll(test.IP, test.MP, test.hwScore, test.recitationCount);
         return result.finalGrade;
     });
 }
 
 function runCombinedBoostTests() {
     const tests = [
-        { description: "HW 92% + 2 recitation boosts optimize best", IP: {P:0,G:2,N:1,L:0}, MP: {P:5,G:5,N:2,L:0}, hwScore: 92, recitationBoosts: 2, expected: "B+" },
-        { description: "HW 85% + 1 recitation boost", IP: {P:0,G:1,N:2,L:0}, MP: {P:4,G:6,N:2,L:0}, hwScore: 85, recitationBoosts: 1, expected: "C+" },
-        { description: "HW LOST 45% + boosts only help", IP: {P:0,G:1,N:2,L:0}, MP: {P:4,G:6,N:2,L:0}, hwScore: 45, recitationBoosts: 1, expected: "C+" },
-        { description: "HW 92% + no boost needed", IP: {P:3,G:0,N:0,L:0}, MP: {P:12,G:0,N:0,L:0}, hwScore: 92, recitationBoosts: 0, expected: "A+" }
+        { description: "HW 92% + 2 recitation boosts optimize best", IP: {P:0,G:2,N:1,L:0}, MP: {P:5,G:5,N:2,L:0}, hwScore: 92, recitationCount: 10, expected: "B+" },
+        { description: "HW 85% + 1 recitation boost", IP: {P:0,G:1,N:2,L:0}, MP: {P:4,G:6,N:2,L:0}, hwScore: 85, recitationCount: 8, expected: "C+" },
+        { description: "HW LOST 45% + boosts only help", IP: {P:0,G:1,N:2,L:0}, MP: {P:4,G:6,N:2,L:0}, hwScore: 45, recitationCount: 8, expected: "C+" },
+        { description: "HW 92% + no boost needed", IP: {P:3,G:0,N:0,L:0}, MP: {P:12,G:0,N:0,L:0}, hwScore: 92, recitationCount: 0, expected: "A+" },
+        { description: "HW 92% + 2 recitation boosts optimize best alt", IP: {P:1,G:2,N:0,L:0}, MP: {P:9,G:1,N:2,L:0}, hwScore: 92, recitationCount: 10, expected: "A"}
     ];
     
     runTestSuite(tests, (test) => {
-        // Apply Homework boost first
-        let result = applyHomeworkBoost(test.MP, test.IP, test.hwScore);
-
-        // Then Recitation Boosts if any
-        if (test.recitationBoosts > 0) {
-            result = optimizeBoosts(result.boostedIP, result.boostedMP, test.recitationBoosts);
-        }
-        
-        return getGrade(result.boostedIP, result.boostedMP);
+        const result = optimizeAll(test.IP, test.MP, test.hwScore, test.recitationCount);
+        return result.finalGrade;
     });
 }
 

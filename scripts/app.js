@@ -134,117 +134,163 @@ function applySingleBoost(dict, from, to) {
     return newDict;
 }
 
-function optimizeBoosts(IP_dict, MP_dict, numBoosts) {
-    let bestGrade = getGrade(IP_dict, MP_dict);
-    let bestIP = { ...IP_dict };
-    let bestMP = { ...MP_dict };
+function optimizeAll(IP_dict, MP_dict, hwScore, recitationCount) {
+    // Determine how many boosts from recitation
+    let recBoosts = 0;
+    if (recitationCount >= 10) recBoosts = 2;
+    else if (recitationCount >= 8) recBoosts = 1;
 
-    function dfs(currentIP, currentMP, boostsLeft) {
-        const currentGrade = getGrade(currentIP, currentMP);
+    // This BFS/DFS will store states of the form:
+    // { IP, MP, hwUsed, boostsLeft }
+    // 'hwUsed' = boolean, indicating if we already used the homework boost.
+
+    const initialGrade = getGrade(IP_dict, MP_dict);
+    let bestGrade = initialGrade;
+    let bestState = {
+        IP: { ...IP_dict },
+        MP: { ...MP_dict }
+    };
+
+    const queue = [];
+    // Push both possibilities: used HW or not used HW initially
+    // Actually, we start "not used" by default. If HW can be used, we do it as an action inside BFS.
+    queue.push({
+        IP: { ...IP_dict },
+        MP: { ...MP_dict },
+        hwUsed: false,
+        boostsLeft: recBoosts
+    });
+
+    // Function to attempt rec-boost
+    function tryRecBoost(IP, MP, from, to, cost) {
+        if ((MP[from] || 0) > 0 && cost <= 1) {
+            // MP single-level
+            const newMP = applySingleBoost(MP, from, to);
+            return { newIP: IP, newMP };
+        } else if ((IP[from] || 0) > 0 && cost === 2) {
+            // IP single-level
+            const newIP = applySingleBoost(IP, from, to);
+            return { newIP, newMP: MP };
+        }
+        return null;
+    }
+
+    // Function to attempt homework usage
+    function tryHomework(IP, MP, score) {
+        // If score < 50, no usage
+        if (score < 50) return [];
+
+        // Convert HW to a letter
+        let hwLetter = 'N';
+        if (score >= 90) hwLetter = 'P';
+        else if (score >= 75) hwLetter = 'G';
+        // else if (score >= 50) hwLetter = 'N';
+
+        const results = [];
+
+        // 1) Try MP replacement
+        // We replace the "lowest" non-L grade, but we can check all possibilities to be thorough
+        const possibleLevels = ['N','G','P'];
+        for (const lv of possibleLevels) {
+            if ((MP[lv] || 0) > 0) {
+                const newMP = { ...MP };
+                newMP[lv]--;
+                newMP[hwLetter] = (newMP[hwLetter] || 0) + 1;
+                results.push({ IP, MP: newMP });
+            }
+        }
+
+        // 2) Try IP single-level boost only if hwLetter == 'P'
+        if (hwLetter === 'P') {
+            const ipUps = [
+                { from: 'G', to: 'P' },
+                { from: 'N', to: 'G' },
+                { from: 'L', to: 'N' }
+            ];
+            for (const { from, to } of ipUps) {
+                if ((IP[from] || 0) > 0) {
+                    const newIP = { ...IP };
+                    newIP[from]--;
+                    newIP[to] = (newIP[to] || 0) + 1;
+                    results.push({ IP: newIP, MP });
+                }
+            }
+        }
+        return results;
+    }
+
+    while (queue.length > 0) {
+        const state = queue.shift();
+        const { IP, MP, hwUsed, boostsLeft } = state;
+
+        // Update best if needed
+        const currentGrade = getGrade(IP, MP);
         if (gradeOrder.indexOf(currentGrade) < gradeOrder.indexOf(bestGrade)) {
             bestGrade = currentGrade;
-            bestIP = { ...currentIP };
-            bestMP = { ...currentMP };
+            bestState = { IP, MP };
         }
 
-        if (boostsLeft <= 0) return;
-
-        // Try all possible boosts on MP first (1 boost each)
-        const mpBoostOptions = [
-            { from: 'G', to: 'P', cost: 1 },
-            { from: 'N', to: 'G', cost: 1 },
-            { from: 'L', to: 'N', cost: 1 }
-        ];
-        for (const { from, to, cost } of mpBoostOptions) {
-            if ((currentMP[from] || 0) > 0 && boostsLeft >= cost) {
-                const newMP = applySingleBoost(currentMP, from, to);
-                dfs(currentIP, newMP, boostsLeft - cost);
+        // 1) If HW not used yet, try using it
+        if (!hwUsed) {
+            const hwOptions = tryHomework(IP, MP, hwScore);
+            for (const opt of hwOptions) {
+                const newGrade = getGrade(opt.IP, opt.MP);
+                // Only enqueue if it might improve or at least could lead to rec-boost combos
+                queue.push({
+                    IP: opt.IP,
+                    MP: opt.MP,
+                    hwUsed: true,
+                    boostsLeft
+                });
             }
         }
 
-        // Try all possible boosts on IP next (2 boosts each)
-        const ipBoostOptions = [
-            { from: 'G', to: 'P', cost: 2 },
-            { from: 'N', to: 'G', cost: 2 },
-            { from: 'L', to: 'N', cost: 2 }
-        ];
-        for (const { from, to, cost } of ipBoostOptions) {
-            if ((currentIP[from] || 0) > 0 && boostsLeft >= cost) {
-                const newIP = applySingleBoost(currentIP, from, to);
-                dfs(newIP, currentMP, boostsLeft - cost);
+        // 2) Try rec-boost usage if we have any left
+        if (boostsLeft > 0) {
+            // MP single-level costs 1
+            const mpUps = [
+                { from: 'G', to: 'P', cost: 1 },
+                { from: 'N', to: 'G', cost: 1 },
+                { from: 'L', to: 'N', cost: 1 }
+            ];
+            for (const up of mpUps) {
+                const result = tryRecBoost(IP, MP, up.from, up.to, up.cost);
+                if (result) {
+                    queue.push({
+                        IP: result.newIP,
+                        MP: result.newMP,
+                        hwUsed,
+                        boostsLeft: boostsLeft - up.cost
+                    });
+                }
             }
-        }
-    }
 
-    dfs(IP_dict, MP_dict, numBoosts);
-
-    return { boostedIP: bestIP, boostedMP: bestMP, finalGrade: bestGrade };
-}
-
-function applyHomeworkBoost(MP_dict, IP_dict, homeworkScore) {
-    // First determine what level the homework score translates to
-    let homeworkLevel;
-    if (homeworkScore >= 90) {
-        homeworkLevel = 'P';
-    } else if (homeworkScore >= 75) {
-        homeworkLevel = 'G';
-    } else if (homeworkScore >= 50) {
-        homeworkLevel = 'N';
-    } else {
-        // If homework score is LOST (< 50%), no boost allowed
-        return { boostedMP: { ...MP_dict }, boostedIP: { ...IP_dict }, boostUsed: false };
-    }
-
-    let bestGrade = getGrade(IP_dict, MP_dict);
-    let bestMP = { ...MP_dict };
-    let bestIP = { ...IP_dict };
-    let boostUsed = false;
-
-    // Option 1: Try MP replacement (excluding L grades)
-    const mpLevels = ['N', 'G', 'P'];
-    for (const level of mpLevels) {
-        if ((MP_dict[level] || 0) > 0) {
-            const trialMP = { ...MP_dict };
-            trialMP[level]--;
-            trialMP[homeworkLevel] = (trialMP[homeworkLevel] || 0) + 1;
-            
-            const trialGrade = getGrade(IP_dict, trialMP);
-            if (gradeOrder.indexOf(trialGrade) < gradeOrder.indexOf(bestGrade)) {
-                bestGrade = trialGrade;
-                bestMP = trialMP;
-                bestIP = { ...IP_dict };
-                boostUsed = true;
-            }
-        }
-    }
-
-    // Option 2: Try IP single-level boost
-    const ipBoostOptions = [
-        { from: 'G', to: 'P' },
-        { from: 'N', to: 'G' },
-        { from: 'L', to: 'N' }
-    ];
-
-    for (const { from, to } of ipBoostOptions) {
-        if ((IP_dict[from] || 0) > 0) {
-            const trialIP = { ...IP_dict };
-            trialIP[from]--;
-            trialIP[to] = (trialIP[to] || 0) + 1;
-            
-            const trialGrade = getGrade(trialIP, MP_dict);
-            if (gradeOrder.indexOf(trialGrade) < gradeOrder.indexOf(bestGrade)) {
-                bestGrade = trialGrade;
-                bestMP = { ...MP_dict };
-                bestIP = trialIP;
-                boostUsed = true;
+            // IP single-level costs 2
+            const ipUps = [
+                { from: 'G', to: 'P', cost: 2 },
+                { from: 'N', to: 'G', cost: 2 },
+                { from: 'L', to: 'N', cost: 2 }
+            ];
+            for (const up of ipUps) {
+                if (boostsLeft >= 2) {
+                    const result = tryRecBoost(IP, MP, up.from, up.to, up.cost);
+                    if (result) {
+                        queue.push({
+                            IP: result.newIP,
+                            MP: result.newMP,
+                            hwUsed,
+                            boostsLeft: boostsLeft - up.cost
+                        });
+                    }
+                }
             }
         }
     }
 
     return {
-        boostedMP: bestMP,
-        boostedIP: bestIP,
-        boostUsed: boostUsed
+        finalGrade: bestGrade,
+        boostedIP: bestState.IP,
+        boostedMP: bestState.MP
     };
 }
 
@@ -320,44 +366,31 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const mpDict = constructDict('mp');
         const ipDict = constructDict('ip');
-
-        // Calculate base grade
+    
+        // Calculate and display base grade
         const baseGrade = getGrade(ipDict, mpDict);
         displayResult(baseGrade);
-
-        // Replace the existing boost handling section in the form submit handler
-        if (recitationBoostCheckbox.checked || homeworkBoostCheckbox.checked) {
-            let boostedMP = { ...mpDict };
-            let boostedIP = { ...ipDict };
-            let remainingBoosts = 0;
-
-            // Apply homework boost first if enabled
-            if (homeworkBoostCheckbox.checked) {
-                const homeworkScore = parseInt(document.getElementById('homework-score').value) || 0;
-                const hwBoostResult = applyHomeworkBoost(boostedMP, boostedIP, homeworkScore);
-                boostedMP = hwBoostResult.boostedMP;
-                boostedIP = hwBoostResult.boostedIP;
-            }
-
-            // Then apply recitation boosts
-            if (recitationBoostCheckbox.checked) {
-                const recitations = parseInt(document.getElementById('recitation-count').value) || 0;
-                let numBoosts = 0;
-                if (recitations >= 10) numBoosts = 2;
-                else if (recitations >= 8) numBoosts = 1;
-
-                if (numBoosts > 0) {
-                    const boostResult = optimizeBoosts(boostedIP, boostedMP, numBoosts);
-                    boostedIP = boostResult.boostedIP;
-                    boostedMP = boostResult.boostedMP;
-                }
-            }
-
-            // Calculate and display boosted grade
-            const boostedGrade = getGrade(boostedIP, boostedMP);
+    
+        // Check if we have any boosts at all
+        const usingRecitation = recitationBoostCheckbox.checked;
+        const usingHomework = homeworkBoostCheckbox.checked;
+    
+        if (usingRecitation || usingHomework) {
+            const hwScore = usingHomework
+                ? parseFloat(document.getElementById('homework-score').value) || 0
+                : 0;
+            const recitations = usingRecitation
+                ? parseInt(document.getElementById('recitation-count').value) || 0
+                : 0;
+            
+            // Call the new BFS-based function
+            const { finalGrade } = optimizeAll(ipDict, mpDict, hwScore, recitations);
+    
+            // Show boosted grade
             boostedGradeSection.classList.remove('hidden');
-            boostedGradeDisplay.textContent = boostedGrade;
+            boostedGradeDisplay.textContent = finalGrade;
         } else {
+            // Hide boosted grade if no boosts are used
             boostedGradeSection.classList.add('hidden');
         }
     });
