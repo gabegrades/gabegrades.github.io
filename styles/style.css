@@ -442,7 +442,7 @@ button:disabled {
 /* Make the table responsive */
 @media (max-width: 768px) {
     .requirements-table {
-        margin: 10px -15px;
+        margin: 10px -5px;
     }
     
     .requirements-table th,
